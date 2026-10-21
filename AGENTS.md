@@ -8,6 +8,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
+## Database
+
+- This is a development project. There is no backwards compatibility and the data is worthless. Prefer data loss: never backfill, migrate, or preserve existing rows, and never spend effort on keeping old data working. Every schema change means a clean slate.
+- Apply database schema changes only with `npm run db:push` (`drizzle-kit push`).
+- Never generate or run database migrations, add migration scripts, or create migration SQL, snapshots, or journals.
 
 ## Git
 

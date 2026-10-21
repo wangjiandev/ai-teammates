@@ -2,6 +2,38 @@
 
 This is a Next.js template with shadcn/ui.
 
+## Database: Drizzle + Neon
+
+Add both connection strings from your selected Neon development branch to
+`.env.local` (this file is ignored by Git). Keep the existing Clerk variables.
+
+```dotenv
+DATABASE_URL=postgresql://USER:PASSWORD@ENDPOINT-pooler.REGION.aws.neon.tech/neondb?sslmode=require
+DATABASE_URL_UNPOOLED=postgresql://USER:PASSWORD@ENDPOINT.REGION.aws.neon.tech/neondb?sslmode=require
+```
+
+The application uses the pooled URL with Drizzle's Neon HTTP driver. Drizzle Kit
+uses the direct URL for schema pushes. Both must point to the same database and branch.
+
+Import `getDb` from `@/db` in Server Components, Route Handlers, or Server Actions.
+Call `const db = getDb()` when needed. The server-only entry point prevents client
+imports, and the connection is initialized lazily so builds do not need database keys.
+Check Clerk authentication and record ownership before returning or mutating data.
+
+Define and export tables in `db/schema.ts`, then run:
+
+```bash
+npm run db:check   # Read-only connection check through Drizzle
+npm run db:push    # Push schema changes directly to the configured branch
+npm run db:studio  # Open Drizzle Studio
+```
+
+The `todos` table stores a UUID, Clerk user ID, title, completion flag, and creation
+timestamp. Filter every todo query by the authenticated Clerk user ID; the column
+and index alone do not enforce access control. Clerk still owns auth and user records.
+Apply schema changes only with `npm run db:push`. Never generate or run database
+migrations, or create migration SQL, snapshots, or journals.
+
 ## Adding components
 
 To add components to your app, run the following command:
