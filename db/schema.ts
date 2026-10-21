@@ -1,19 +1,25 @@
-import { boolean, index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import { index, pgTable, text, timestamp } from "drizzle-orm/pg-core"
+import { nanoid } from "nanoid"
 
-export const todos = pgTable(
-  "todos",
+export const bots = pgTable(
+  "bots",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    id: text("id").primaryKey().$defaultFn(nanoid),
     // Clerk owns user records; authorize queries against the signed-in user's ID.
     userId: text("user_id").notNull(),
-    title: text("title").notNull(),
-    completed: boolean("completed").default(false).notNull(),
+    name: text("name").notNull(),
+    avatar: text("avatar").notNull(),
+    // A short phrase describing what the bot is for.
+    job: text("job").notNull(),
+    instructions: text("instructions"),
+    // Third-party sandbox ID, set when the sandbox is created lazily.
+    sandboxId: text("sandbox_id"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
   },
-  (table) => [index("todos_user_id_idx").on(table.userId)]
+  (table) => [index("bots_user_id_idx").on(table.userId)]
 )
 
-export type Todo = typeof todos.$inferSelect
-export type NewTodo = typeof todos.$inferInsert
+export type Bot = typeof bots.$inferSelect
+export type NewBot = typeof bots.$inferInsert
