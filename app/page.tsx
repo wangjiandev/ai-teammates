@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto"
 import { auth } from "@clerk/nextjs/server"
 
+import { BotDialog } from "@/components/bot-dialog"
 import { ChatAvatar } from "@/components/chat-avatar"
-import { Button } from "@/components/ui/button"
 import {
   Empty,
   EmptyContent,
@@ -33,7 +33,7 @@ export default async function Page() {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button>Button</Button>
+          <BotDialog />
           <div className="font-mono text-xs text-muted-foreground">
             (Press <kbd>d</kbd> to toggle dark mode)
           </div>

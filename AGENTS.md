@@ -14,6 +14,23 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Apply database schema changes only with `npm run db:push` (`drizzle-kit push`).
 - Never generate or run database migrations, add migration scripts, or create migration SQL, snapshots, or journals.
 
+## Forms and Server Actions
+
+Use `components/bot-dialog.tsx`, `actions/bot.ts`, and `db/schema.ts` as reference implementations.
+
+- Use the shadcn skill for form composition, the Clerk skill for authentication, and the Neon skill for database work. Read the relevant component documentation and reuse installed primitives.
+- For database-backed forms, derive Zod validation from Drizzle tables, using `drizzle-zod`'s `createInsertSchema` for inserts. Derive the client input schema with an explicit `.pick()` of editable fields and infer TypeScript types from it. Share that schema between the form and server action instead of duplicating validation.
+- Trim text and reject whitespace-only required fields. Keep optional fields optional and normalize blank optional text to `null` before inserting when the database column is nullable.
+- Put mutations in `actions/<resource>.ts` with `"use server"`. For authenticated mutations, call `await auth.protect()` inside the action and obtain `userId` from Clerk. Assign ownership IDs, generated IDs, timestamps, and lazily assigned external IDs on the server; never let form input assign or override them. Page protection does not replace action authentication.
+- Treat action input as untrusted and validate it again with `safeParse` before any database write. Use `getDb()` from `@/db`, assign trusted server fields after validation, and return a typed success/error result with field errors when appropriate. Keep internal database errors out of user-facing messages.
+- Build interactive forms as Client Components using React Hook Form, `zodResolver`, and explicit default values. Keep route pages as Server Components. Use `register` for simple inputs, `Controller` for controlled components, and `useWatch` for previews or dependent controls.
+- Compose forms with `FieldGroup`, `Field`, `FieldLabel`, `FieldDescription`, and `FieldError`, plus existing `Input` and `Textarea` components. Associate labels and errors with stable IDs; pair `data-invalid` on fields with `aria-invalid` on controls, and expose disabled states consistently.
+- Compose dialogs with the existing Dialog primitives, including an accessible title and description. This project uses Base UI: use `render` for trigger/close composition. Use semantic theme tokens and component variants; use layout classes to match references instead of rebuilding controls or hardcoding theme colors.
+- Use `ToggleGroup` for selectable presets. Apply preset and shuffle changes through React Hook Form's `setValue`, updating dirty and validation state as needed. Give every non-submit form button `type="button"`. For DiceBear faces, store the seed and preview it with `ChatAvatar`; generate fresh seeds in event handlers or during request-time server rendering, never during client rendering.
+- While submitting, disable duplicate submissions and editing, show a `Spinner` with a clear pending label, and prevent dialog dismissal. Preserve entered values on failure, map server field errors back to the form, and show a safe form-level error for other failures.
+- After a successful write, revalidate the affected path, close the dialog, and show a success toast using the project's `toast` component. Reset a creation form when reopening it so stale values and errors do not carry over.
+- Verify mutation validation, signed-out rejection, ownership enforcement, and failure handling with meaningful tests. Run typecheck and lint, check the important form interactions in the browser, and remove temporary preview routes and test records after verification.
+
 ## Git
 
 - Never create branches, worktrees, or commits automatically. Only do so when the user explicitly asks for that specific action in the current request.
