@@ -1,14 +1,21 @@
 "use server"
 
 import { auth } from "@clerk/nextjs/server"
+import { nanoid } from "nanoid"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
 import { getDb } from "@/db"
-import { bots, createBotSchema, type CreateBotInput } from "@/db/schema"
+import {
+  bots,
+  chatMembers,
+  chats,
+  createBotSchema,
+  type CreateBotInput,
+} from "@/db/schema"
 
 type CreateBotResult =
-  | { success: true; botId: string }
+  | { success: true; botId: string; chatId: string }
   | {
       success: false
       error: string
@@ -27,20 +34,27 @@ export async function createBot(input: unknown): Promise<CreateBotResult> {
     }
   }
 
-  let botId: string
+  // Generate both IDs before building the batch so the membership can link them.
+  const botId = nanoid()
+  const chatId = nanoid()
 
   try {
-    const [bot] = await getDb()
-      .insert(bots)
-      .values({
+    const db = getDb()
+    await db.batch([
+      db.insert(bots).values({
         ...parsed.data,
+        id: botId,
         instructions: parsed.data.instructions || null,
         userId,
-      })
-      .returning({ id: bots.id })
-
-    if (!bot) throw new Error("The database did not return the new bot.")
-    botId = bot.id
+      }),
+      db.insert(chats).values({
+        id: chatId,
+        userId,
+        kind: "direct",
+        name: null,
+      }),
+      db.insert(chatMembers).values({ chatId, botId }),
+    ])
   } catch (error) {
     console.error("Failed to create bot:", error)
     return {
@@ -50,5 +64,5 @@ export async function createBot(input: unknown): Promise<CreateBotResult> {
   }
 
   revalidatePath("/")
-  return { success: true, botId }
+  return { success: true, botId, chatId }
 }
