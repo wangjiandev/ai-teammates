@@ -1,8 +1,8 @@
 import { UserButton } from "@clerk/nextjs"
 import { format, formatDistanceStrict } from "date-fns"
-import Link from "next/link"
 
 import { ChatListItemContent } from "@/components/chat-list-item"
+import { SidebarChatLink } from "@/components/sidebar-chat-link"
 import { SidebarCreateMenu } from "@/components/sidebar-create-menu"
 import { SidebarSearch } from "@/components/sidebar-search"
 import {
@@ -46,17 +46,9 @@ export async function AppSidebar() {
             <SidebarMenu aria-label="Chats">
               {chats.map((chat) => (
                 <SidebarMenuItem key={chat.id}>
-                  <SidebarMenuButton
-                    render={
-                      <Link href={`/chats/${encodeURIComponent(chat.id)}`} />
-                    }
-                    size="lg"
-                    aria-label={chat.name}
-                    tooltip={chat.name}
-                    className="gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden"
-                  >
+                  <SidebarChatLink chatId={chat.id} name={chat.name}>
                     <ChatListItemContent chat={chat} />
-                  </SidebarMenuButton>
+                  </SidebarChatLink>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
