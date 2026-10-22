@@ -2,6 +2,21 @@
 
 This is a Next.js template with shadcn/ui.
 
+## AI chat: DeepSeek
+
+Add a [DeepSeek API key](https://platform.deepseek.com/api_keys) to `.env.local`
+and restart the development server:
+
+```dotenv
+DEEPSEEK_API_KEY=your_api_key_here
+```
+
+Chat pages use the AI SDK's `useChat` hook and an authenticated `/api/chat` route
+to stream responses from DeepSeek's `deepseek-flash` model. Messages live only
+in the mounted chat UI and are cleared when you leave the chat or reload.
+The UI uses shadcn's `MessageScroller`, `Message`, `Bubble`, and `InputGroup`
+components from `components/ui`.
+
 ## Database: Drizzle + Neon
 
 Add both connection strings from your selected Neon development branch to
