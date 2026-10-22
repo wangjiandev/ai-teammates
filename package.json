@@ -10,7 +10,7 @@
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-test-module-mocks --import tsx --test actions/*.test.mjs queries/*.test.mjs app/api/chat/*.test.mjs",
+    "test": "node --experimental-test-module-mocks --import tsx --test actions/*.test.mjs queries/*.test.mjs trigger/*.test.mjs",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:check": "tsx scripts/check-db.ts"

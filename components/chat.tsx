@@ -2,10 +2,14 @@
 
 import { useChat } from "@ai-sdk/react"
 import { zodResolver } from "@hookform/resolvers/zod"
+import type { ChatSessionPersistedState } from "@trigger.dev/sdk/chat"
+import { useTriggerChatTransport } from "@trigger.dev/sdk/chat/react"
+import type { UIMessage } from "ai"
 import { ArrowUpIcon, MessageCircleIcon, SquareIcon } from "lucide-react"
 import { useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
+import { mintChatAccessToken, startChatSession } from "@/actions/chat"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
 import { Button } from "@/components/ui/button"
@@ -40,14 +44,34 @@ import {
 } from "@/components/ui/message-scroller"
 import { Spinner } from "@/components/ui/spinner"
 import { Trace, TraceIcon, TraceLine, TraceTitle } from "@/components/ui/trace"
+import type { chatAgent } from "@/trigger/chat"
 
 const promptSchema = z.object({
   message: z.string().trim().min(1, "Enter a message."),
 })
 
-export function Chat({ chatId, botName }: { chatId: string; botName: string }) {
+export function Chat({
+  chatId,
+  botName,
+  initialMessages,
+  initialSession,
+}: {
+  chatId: string
+  botName: string
+  initialMessages: UIMessage[]
+  initialSession?: ChatSessionPersistedState
+}) {
+  const transport = useTriggerChatTransport<typeof chatAgent>({
+    task: "chat-agent",
+    accessToken: ({ chatId }) => mintChatAccessToken(chatId),
+    startSession: ({ chatId }) => startChatSession(chatId),
+    sessions: initialSession ? { [chatId]: initialSession } : undefined,
+  })
   const { messages, sendMessage, status, error, regenerate, stop } = useChat({
     id: chatId,
+    messages: initialMessages,
+    transport,
+    resume: !!initialSession,
   })
   const form = useForm<z.infer<typeof promptSchema>>({
     resolver: zodResolver(promptSchema),
@@ -181,7 +205,10 @@ export function Chat({ chatId, botName }: { chatId: string; botName: string }) {
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => void stop()}
+                      onClick={() => {
+                        void stop()
+                        void transport.stopGeneration(chatId)
+                      }}
                     >
                       <SquareIcon data-icon="inline-start" />
                       Stop
