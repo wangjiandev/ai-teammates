@@ -1,6 +1,6 @@
 "use client"
 
-import { useId, useState } from "react"
+import { useId, useState, type ReactNode } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { PlusIcon, ShuffleIcon } from "lucide-react"
 import { useForm, useWatch } from "react-hook-form"
@@ -69,7 +69,11 @@ const defaultValues: CreateBotInput = {
   instructions: "",
 }
 
-export function BotDialog() {
+export function BotDialog({
+  trigger,
+}: {
+  trigger?: (openDialog: () => void) => ReactNode
+}) {
   const [open, setOpen] = useState(false)
   const id = useId()
   const form = useForm<CreateBotInput>({
@@ -80,6 +84,12 @@ export function BotDialog() {
   const job = useWatch({ control: form.control, name: "job" })
   const { errors, isSubmitting } = form.formState
   const selectedPreset = presets.find((preset) => preset.job === job)
+
+  function openDialog() {
+    if (isSubmitting) return
+    form.reset({ ...defaultValues, avatar: crypto.randomUUID() })
+    setOpen(true)
+  }
 
   async function onSubmit(values: CreateBotInput) {
     form.clearErrors("root")
@@ -122,15 +132,20 @@ export function BotDialog() {
           return
         }
         if (nextOpen) {
-          form.reset({ ...defaultValues, avatar: crypto.randomUUID() })
+          openDialog()
+        } else {
+          setOpen(false)
         }
-        setOpen(nextOpen)
       }}
     >
-      <DialogTrigger render={<Button />}>
-        <PlusIcon data-icon="inline-start" />
-        Create bot
-      </DialogTrigger>
+      {trigger ? (
+        trigger(openDialog)
+      ) : (
+        <DialogTrigger render={<Button />}>
+          <PlusIcon data-icon="inline-start" />
+          Create bot
+        </DialogTrigger>
+      )}
       <DialogContent className="max-h-[calc(100svh-2rem)] gap-6 overflow-y-auto p-6 sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>New bot</DialogTitle>
