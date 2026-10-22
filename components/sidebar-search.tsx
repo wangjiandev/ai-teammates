@@ -9,7 +9,6 @@ import {
   ChatListItemContent,
   type ChatSummary,
 } from "@/components/chat-list-item"
-import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandDialog,
@@ -20,9 +19,11 @@ import {
   CommandList,
 } from "@/components/ui/command"
 import { Kbd, KbdGroup } from "@/components/ui/kbd"
+import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar"
 
 export function SidebarSearch({ chats }: { chats: ChatSummary[] }) {
   const router = useRouter()
+  const { state, isMobile } = useSidebar()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
 
@@ -54,23 +55,29 @@ export function SidebarSearch({ chats }: { chats: ChatSummary[] }) {
 
   return (
     <>
-      <Button
+      <SidebarMenuButton
         type="button"
-        variant="ghost"
+        variant={state === "collapsed" && !isMobile ? "default" : "outline"}
+        tooltip="Search chats"
         aria-label="Search chats"
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-keyshortcuts="Meta+K Control+K"
         onClick={() => handleOpenChange(true)}
-        className="h-8 w-full min-w-0 justify-start gap-2 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base font-normal text-muted-foreground transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 has-data-[icon=inline-start]:pl-2.5 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
+        className="group-data-[collapsible=icon]:justify-center"
       >
         <SearchIcon data-icon="inline-start" />
-        <span className="flex-1 text-left">Search</span>
-        <KbdGroup aria-hidden="true">
+        <span className="flex-1 text-left group-data-[collapsible=icon]:hidden">
+          Search
+        </span>
+        <KbdGroup
+          aria-hidden="true"
+          className="group-data-[collapsible=icon]:hidden"
+        >
           <Kbd>⌘</Kbd>
           <Kbd>K</Kbd>
         </KbdGroup>
-      </Button>
+      </SidebarMenuButton>
       <CommandDialog
         open={open}
         onOpenChange={handleOpenChange}

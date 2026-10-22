@@ -15,6 +15,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from "@/components/ui/sidebar"
 import { getUserChats } from "@/queries/bots"
 
@@ -32,14 +33,14 @@ export async function AppSidebar() {
   }))
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex justify-end">
+        <div className="flex justify-end group-data-[collapsible=icon]:justify-start">
           <SidebarCreateMenu />
         </div>
         <SidebarSearch chats={chats} />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="group-data-[collapsible=icon]:overflow-y-auto">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu aria-label="Chats">
@@ -50,7 +51,9 @@ export async function AppSidebar() {
                       <Link href={`/chats/${encodeURIComponent(chat.id)}`} />
                     }
                     size="lg"
-                    className="gap-3"
+                    aria-label={chat.name}
+                    tooltip={chat.name}
+                    className="gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden"
                   >
                     <ChatListItemContent chat={chat} />
                   </SidebarMenuButton>
@@ -65,7 +68,7 @@ export async function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               render={<div />}
-              className="p-0 has-focus-visible:ring-2"
+              className="p-0 group-data-[collapsible=icon]:p-0! has-focus-visible:ring-2"
             >
               <UserButton
                 showName
@@ -73,12 +76,12 @@ export async function AppSidebar() {
                   elements: {
                     rootBox: "h-full w-full",
                     userButtonTrigger:
-                      "h-full w-full rounded-md p-2 text-inherit shadow-none transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:shadow-none active:bg-sidebar-accent active:text-sidebar-accent-foreground",
+                      "h-full w-full rounded-md p-2 text-inherit shadow-none transition-[width,height,padding] group-data-[collapsible=icon]:p-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:shadow-none active:bg-sidebar-accent active:text-sidebar-accent-foreground",
                     userButtonBox:
-                      "w-full min-w-0 flex-row-reverse justify-end gap-2",
+                      "w-full min-w-0 flex-row-reverse justify-end gap-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0",
                     userButtonAvatarBox: "size-6 shrink-0",
                     userButtonOuterIdentifier:
-                      "min-w-0 flex-1 truncate p-0 text-left text-sm font-normal text-inherit",
+                      "min-w-0 flex-1 truncate p-0 text-left text-sm font-normal text-inherit group-data-[collapsible=icon]:hidden",
                   },
                 }}
               />
@@ -86,6 +89,7 @@ export async function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   )
 }
